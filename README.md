@@ -6,7 +6,7 @@ SeeFix is a camera-first repair copilot. Point a phone at a broken fixture and S
 
 Hero demo: **replacing a worn toilet flapper**. Avery (first-time renter) has a toilet that runs all night; Morgan (weekend fixer) wants proof the part matches and the job was done right.
 
-**Live app:** LIVE_URL_PLACEHOLDER · **Model test bench:** LIVE_URL_PLACEHOLDER/lab
+**Live app:** https://seefix.vercel.app · **Model test bench:** https://seefix.vercel.app/lab
 
 Built by team **Northbridge** for the Meta AI Developer Hackathon (Indie track).
 

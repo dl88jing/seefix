@@ -116,6 +116,8 @@ modal deploy modal/glimmer_gate.py                  # prints the web endpoint UR
 
 Then set `GLIMMER_URL` (the printed URL) and `GLIMMER_API_KEY` on Vercel.
 
+Day-one status: the gate is deployed on Modal (H100, scale-to-zero, max one container) and answers `/v1/models` and chat requests; a cold start with cached weights takes about 2.5 minutes. The `vllm/vllm-openai:muse-glimmer` build does not enforce `response_format` JSON schemas for Glimmer, so `/api/safety` asks for the JSON shape in the prompt, extracts the object and validates it with zod (a missing `hazard` is derived from `severity` and reported in a `normalized` field).
+
 ### Deploy the app
 
 ```bash

@@ -11,7 +11,9 @@ const SYSTEM = `You are the safety gate for a home-repair copilot. Look at the p
 Flag a hazard if the step or scene risks injury or damage: live electrical work, gas lines or smell of gas, scalding water, refrigerant, carbon monoxide, structural load, water near outlets, sewage exposure, sharp/crush risk, or work that legally requires a licensed pro.
 severity: none | low | medium | high | critical. Use critical for anything that should stop the user immediately (gas, live mains, CO).
 reason: one or two plain sentences a homeowner understands.
-Respond only with JSON matching the schema.`;
+hazard: true if any hazard applies, otherwise false.
+Respond with only one JSON object and nothing else, with exactly these three keys in this order:
+{"hazard": true or false, "severity": "none|low|medium|high|critical", "reason": "..."}`;
 
 export async function POST(req: Request) {
   const base = process.env.GLIMMER_URL;
@@ -48,23 +50,41 @@ export async function POST(req: Request) {
         ],
         // Glimmer: keep default sampling (temp 1.0); reasoning needs token headroom.
         max_tokens: 4096,
-        response_format: { type: "json_schema", json_schema: { name: "safety_verdict", schema: SafetyJsonSchema } },
+        response_format: { type: "json_schema", json_schema: { name: "safety_verdict", strict: true, schema: SafetyJsonSchema } },
       }),
     });
     const text = await res.text();
     if (!res.ok) throw Object.assign(new Error(text.slice(0, 500) || res.statusText), { status: res.status });
     const data = JSON.parse(text) as { choices?: { message?: { content?: string | null } }[] };
     const content = data.choices?.[0]?.message?.content ?? "";
-    let raw: unknown;
-    try {
-      raw = JSON.parse(content);
-    } catch {
-      return NextResponse.json({ error: "invalid_model_output", content }, { status: 502 });
+    const raw = extractJson(content);
+    if (!raw) return NextResponse.json({ error: "invalid_model_output", content }, { status: 502 });
+    // This vLLM build does not enforce response_format for Glimmer, so the
+    // schema is requested in the prompt and validated here. One transparent
+    // normalization: if "hazard" is omitted, derive it from severity.
+    const normalized: string[] = [];
+    if (typeof raw.hazard !== "boolean" && typeof raw.severity === "string") {
+      raw.hazard = raw.severity !== "none";
+      normalized.push("hazard derived from severity");
     }
     const parsed = SafetyVerdict.safeParse(raw);
     if (!parsed.success) return NextResponse.json({ error: "schema_mismatch", issues: parsed.error.issues, content: raw }, { status: 502 });
-    return NextResponse.json({ model: MODELS.glimmer, ...parsed.data });
+    return NextResponse.json({ model: MODELS.glimmer, ...parsed.data, ...(normalized.length ? { normalized } : {}) });
   } catch (e) {
     return upstreamError("glimmer", e);
+  }
+}
+
+/** Pull the first JSON object out of model text (tolerates code fences / prose). */
+function extractJson(text: string): Record<string, unknown> | null {
+  const cleaned = text.replace(/```(?:json)?/gi, "").trim();
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  if (start < 0 || end <= start) return null;
+  try {
+    const v = JSON.parse(cleaned.slice(start, end + 1));
+    return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
+  } catch {
+    return null;
   }
 }

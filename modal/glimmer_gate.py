@@ -32,7 +32,12 @@ hf_cache = modal.Volume.from_name("seefix-glimmer-hf-cache", create_if_missing=T
 vllm_cache = modal.Volume.from_name("seefix-glimmer-vllm-cache", create_if_missing=True)
 
 image = (
-    modal.Image.from_registry(VLLM_IMAGE)
+    modal.Image.from_registry(
+        VLLM_IMAGE,
+        # Modal's own runtime gets a separate interpreter; vLLM keeps the image's
+        # Python and is launched as the `vllm` CLI in a subprocess.
+        add_python="3.12",
+    )
     .entrypoint([])  # the image's ENTRYPOINT is `vllm serve`; Modal runs its own
     .env({"HF_HUB_ENABLE_HF_TRANSFER": "0", "HF_XET_HIGH_PERFORMANCE": "1"})
 )
@@ -45,11 +50,27 @@ secrets = [modal.Secret.from_name("seefix-glimmer", required_keys=["GLIMMER_API_
 @app.function(volumes={"/root/.cache/huggingface": hf_cache}, timeout=60 * MINUTES, cpu=4, memory=8192)
 def download_weights():
     """CPU-only pre-download so GPU containers never pay for the 60 GB pull."""
-    from huggingface_hub import snapshot_download
-
-    path = snapshot_download(MODEL_ID, revision=MODEL_REVISION)
+    py = _image_python()
+    code = (
+        "from huggingface_hub import snapshot_download;"
+        f"print(snapshot_download({MODEL_ID!r}, revision={MODEL_REVISION!r}, max_workers=16))"
+    )
+    subprocess.run([py, "-c", code], check=True)
     hf_cache.commit()
-    print("weights ready at", path)
+    print("weights ready in volume seefix-glimmer-hf-cache")
+
+
+def _image_python() -> str:
+    """The interpreter vLLM was installed into (from the `vllm` script's shebang)."""
+    import shutil
+
+    vllm_bin = shutil.which("vllm")
+    if vllm_bin:
+        with open(vllm_bin) as f:
+            first = f.readline().strip()
+        if first.startswith("#!") and "python" in first:
+            return first[2:].split()[0]
+    return "/usr/bin/python3"
 
 
 @app.function(

@@ -100,6 +100,7 @@ npm run dev                  # http://localhost:3000 and /lab
 | `META_API_KEY` | `/api/identify`, `/api/segment`, `/api/card` | Meta Model API key from dev.meta.ai. `MODEL_API_KEY` (the name in Meta's docs) is accepted as a fallback. |
 | `GLIMMER_URL` | `/api/safety` | Base URL of the Modal web endpoint (no trailing `/v1`). |
 | `GLIMMER_API_KEY` | `/api/safety` (when the gate is locked) | Must match `GLIMMER_API_KEY` in the Modal secret `seefix-glimmer`. |
+| `GLIMMER_QUOTA_URL` | `/api/safety` | Web URL of the `quota` function (rate limiter) in the same Modal app. Without it the safety gate stays closed. |
 | `META_BASE_URL` | optional | Defaults to `https://api.meta.ai/v1`. |
 | `META_SPARK_MODEL`, `META_SAM_MODEL`, `META_IMAGE_MODEL`, `GLIMMER_MODEL` | optional | Override model ids (defaults: `muse-spark-1.3`, `sam-3.1`, `muse-image-1.0`, `muse-glimmer`). |
 
@@ -114,7 +115,11 @@ modal run modal/glimmer_gate.py::download_weights   # CPU-only, fills the HF cac
 modal deploy modal/glimmer_gate.py                  # prints the web endpoint URL
 ```
 
-Then set `GLIMMER_URL` (the printed URL) and `GLIMMER_API_KEY` on Vercel.
+Then set `GLIMMER_URL` (the printed `serve` URL), `GLIMMER_QUOTA_URL` (the printed `quota` URL) and `GLIMMER_API_KEY` on Vercel.
+
+**Rate limits on the public safety gate.** `/api/safety` is metered before the GPU is touched: 10 requests per hour per IP (sliding window) and 100 requests per UTC day for the whole site, enforced by the `quota` Modal function (one CPU container, scale-to-zero, counters in the Modal Dict `seefix-glimmer-quota`, IPs HMAC-hashed). Each Vercel instance also pre-checks the per-IP window in memory. Over the limit returns HTTP 429 with `Retry-After`; if the limiter is unreachable the gate fails closed (503). Override with `SAFETY_PER_IP_PER_HOUR` / `SAFETY_GLOBAL_PER_DAY` at `modal deploy` time.
+
+**Meta API not yet active.** If the Meta account has no billing yet, Meta returns HTTP 402 `billing_error` / `billing_not_configured`. The Meta routes turn that into HTTP 503 `{"error":"meta_api_not_active"}` and `/lab` shows a "Meta API not yet active" notice instead of a raw error.
 
 Day-one status: the gate is deployed on Modal (H100, scale-to-zero, max one container) and answers `/v1/models` and chat requests; a cold start with cached weights takes about 2.5 minutes. The `vllm/vllm-openai:muse-glimmer` build does not enforce `response_format` JSON schemas for Glimmer, so `/api/safety` asks for the JSON shape in the prompt, extracts the object and validates it with zod (a missing `hazard` is derived from `severity` and reported in a `normalized` field).
 

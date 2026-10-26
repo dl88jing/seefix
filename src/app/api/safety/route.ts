@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { MODELS, missingEnv } from "@/lib/env";
 import { badRequest, upstreamError } from "@/lib/http";
 import { InputError, readImageInput } from "@/lib/image";
+import { safetyRateLimit } from "@/lib/ratelimit";
 import { SafetyJsonSchema, SafetyVerdict } from "@/lib/schemas";
 
 export const runtime = "nodejs";
@@ -26,6 +27,10 @@ export async function POST(req: Request) {
     if (e instanceof InputError) return badRequest(e.message);
     throw e;
   }
+  // Validate first so malformed requests don't spend quota; then meter before touching the GPU.
+  const rl = await safetyRateLimit(req);
+  if (rl.deny) return rl.deny;
+
   const step = (input.fields.step || input.fields.context || "").trim() || "General inspection before starting a repair.";
 
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -69,7 +74,10 @@ export async function POST(req: Request) {
     }
     const parsed = SafetyVerdict.safeParse(raw);
     if (!parsed.success) return NextResponse.json({ error: "schema_mismatch", issues: parsed.error.issues, content: raw }, { status: 502 });
-    return NextResponse.json({ model: MODELS.glimmer, ...parsed.data, ...(normalized.length ? { normalized } : {}) });
+    return NextResponse.json(
+      { model: MODELS.glimmer, ...parsed.data, ...(normalized.length ? { normalized } : {}) },
+      { headers: rl.headers },
+    );
   } catch (e) {
     return upstreamError("glimmer", e);
   }

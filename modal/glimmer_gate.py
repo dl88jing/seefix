@@ -12,7 +12,8 @@ Usage:
 
 Auth: if a Modal secret named "seefix-glimmer" contains GLIMMER_API_KEY, vLLM
 requires `Authorization: Bearer <GLIMMER_API_KEY>`. Set the same value as
-GLIMMER_API_KEY on Vercel, and set GLIMMER_URL to the printed web URL.
+GLIMMER_API_KEY on Vercel, and set GLIMMER_URL to the printed web URL of `serve`
+and GLIMMER_QUOTA_URL to the printed web URL of `quota` (the rate limiter).
 """
 
 import os
@@ -115,6 +116,80 @@ def serve():
         cmd += ["--api-key", os.environ["GLIMMER_API_KEY"]]
     print("starting:", " ".join(a if not a.startswith("sk-") else "***" for a in cmd[:-2]))
     subprocess.Popen(cmd)
+
+
+# ---------------------------------------------------------------------------
+# Quota service: the authoritative rate limiter for the public /api/safety route.
+# A tiny CPU function (scale-to-zero, one container, serialized with a lock) keeps
+# counters in a Modal Dict so limits hold across every Vercel instance:
+#   - SAFETY_PER_IP_PER_HOUR per hashed IP (sliding 1 h window), default 10
+#   - SAFETY_GLOBAL_PER_DAY for the whole site (UTC day), default 100
+# Vercel sends only an HMAC of the client IP, never the raw IP.
+# ---------------------------------------------------------------------------
+PER_IP_PER_HOUR = int(os.environ.get("SAFETY_PER_IP_PER_HOUR", "10"))
+GLOBAL_PER_DAY = int(os.environ.get("SAFETY_GLOBAL_PER_DAY", "100"))
+
+quota_image = modal.Image.debian_slim(python_version="3.12").pip_install("fastapi[standard]").env(
+    {"SAFETY_PER_IP_PER_HOUR": str(PER_IP_PER_HOUR), "SAFETY_GLOBAL_PER_DAY": str(GLOBAL_PER_DAY)}
+)
+quota_dict = modal.Dict.from_name("seefix-glimmer-quota", create_if_missing=True)
+
+
+@app.function(
+    image=quota_image,
+    secrets=secrets,
+    cpu=0.25,
+    memory=256,
+    min_containers=0,
+    max_containers=1,  # single writer: the asyncio lock below makes check-and-increment atomic
+    scaledown_window=2 * MINUTES,
+)
+@modal.concurrent(max_inputs=32)
+@modal.asgi_app()
+def quota():
+    import asyncio
+    import hmac
+    import time
+
+    from fastapi import FastAPI, Header, HTTPException
+    from pydantic import BaseModel
+
+    web = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+    lock = asyncio.Lock()
+    per_ip = int(os.environ["SAFETY_PER_IP_PER_HOUR"])
+    per_day = int(os.environ["SAFETY_GLOBAL_PER_DAY"])
+    expected = os.environ.get("GLIMMER_API_KEY", "")
+
+    class Check(BaseModel):
+        key: str
+
+    @web.post("/check")
+    async def check(body: Check, authorization: str = Header(default="")):
+        if not expected or not hmac.compare_digest(authorization, f"Bearer {expected}"):
+            raise HTTPException(status_code=401, detail="unauthorized")
+        key = body.key[:64]
+        now = time.time()
+        day = time.strftime("%Y-%m-%d", time.gmtime(now))
+        async with lock:
+            day_key = f"day:{day}"
+            used_today = await quota_dict.get.aio(day_key, 0)
+            if used_today >= per_day:
+                retry = int(86400 - (now % 86400)) + 1
+                return {"allowed": False, "scope": "global", "retry_after": retry}
+            ip_key = f"ip:{key}"
+            hits = [t for t in await quota_dict.get.aio(ip_key, []) if now - t < 3600]
+            if len(hits) >= per_ip:
+                return {"allowed": False, "scope": "ip", "retry_after": int(hits[0] + 3600 - now) + 1}
+            hits.append(now)
+            await quota_dict.put.aio(ip_key, hits)
+            await quota_dict.put.aio(day_key, used_today + 1)
+            return {
+                "allowed": True,
+                "remaining_ip": per_ip - len(hits),
+                "remaining_global": per_day - used_today - 1,
+            }
+
+    return web
 
 
 @app.local_entrypoint()

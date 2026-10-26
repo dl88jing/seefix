@@ -36,5 +36,6 @@ export function envStatus() {
     META_API_KEY: Boolean(metaApiKey()),
     GLIMMER_URL: Boolean(process.env.GLIMMER_URL),
     GLIMMER_API_KEY: Boolean(process.env.GLIMMER_API_KEY),
+    GLIMMER_QUOTA_URL: Boolean(process.env.GLIMMER_QUOTA_URL),
   };
 }

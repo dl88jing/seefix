@@ -48,3 +48,8 @@ next-env.d.ts
 modal/.env*
 **/*secret*
 **/*.key
+.meta_api_key
+**/.meta_api_key
+*_api_key
+__pycache__/
+*.pyc

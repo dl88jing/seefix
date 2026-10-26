@@ -26,9 +26,9 @@ export async function metaPost<T>(path: string, body: unknown, timeoutMs = 120_0
     /* non-JSON error body */
   }
   if (!res.ok) {
-    const msg =
-      (json as { error?: { message?: string } } | null)?.error?.message ?? text.slice(0, 500) ?? res.statusText;
-    throw Object.assign(new Error(msg), { status: res.status });
+    const upstream = (json as { error?: { message?: string; code?: string; type?: string } } | null)?.error;
+    const msg = upstream?.message ?? (text.slice(0, 500) || res.statusText);
+    throw Object.assign(new Error(msg), { status: res.status, code: upstream?.code, type: upstream?.type });
   }
   return json as T;
 }

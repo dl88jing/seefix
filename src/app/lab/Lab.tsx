@@ -47,9 +47,36 @@ function hexToRgb(hex: string) {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
+/** Friendly banner for known, expected states (Meta billing not active yet, rate limits). */
+function Notice({ result }: { result: Result }) {
+  const b = (result?.body ?? null) as { error?: string; title?: string; message?: string } | null;
+  if (!b || typeof b !== "object") return null;
+  if (b.error === "meta_api_not_active") {
+    return (
+      <div role="status" className="mt-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">
+        <p className="font-medium">Meta API not yet active</p>
+        <p className="mt-1 text-amber-200/80">
+          This deployment&apos;s Meta Model API account is still being activated (hackathon credits can take up to 2
+          business days). The route is wired up and will start returning real results automatically. Nothing here is mocked.
+        </p>
+      </div>
+    );
+  }
+  if (b.error === "rate_limited" || b.error === "rate_limiter_unavailable") {
+    return (
+      <div role="status" className="mt-3 rounded-lg border border-sky-500/40 bg-sky-500/10 p-3 text-sm text-sky-200">
+        <p className="font-medium">{b.title ?? "Safety gate temporarily unavailable"}</p>
+        <p className="mt-1 text-sky-200/80">{b.message}</p>
+      </div>
+    );
+  }
+  return null;
+}
+
 function JsonPane({ title, result, busy }: { title: string; result: Result; busy: boolean }) {
   return (
     <div className="mt-3">
+      <Notice result={result} />
       <p className="text-xs text-zinc-500">
         {title}
         {busy ? " · running…" : result ? ` · HTTP ${result.status} · ${result.ms} ms` : ""}

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const steps = [
-  { k: "Identify", d: "Snap the model plate. Muse Spark reads brand, model and serial into a typed record.", api: "/api/identify" },
+  { k: "Identify", d: "Snap the model plate. Muse Spark Open (via Baseten) reads brand, model and serial into a typed record.", api: "/api/identify" },
   { k: "See the part", d: "SAM 3.1 finds the exact part you name, like \u201ctoilet flapper\u201d, and masks it on your camera frame.", api: "/api/segment" },
   { k: "Show, don't tell", d: "Muse Image turns your own photo into an annotated instruction card for the next step.", api: "/api/card" },
   { k: "Safety gate", d: "Muse Glimmer, Meta's open-weights model self-hosted on Modal, stops the job on gas, live mains or scald risk.", api: "/api/safety" },

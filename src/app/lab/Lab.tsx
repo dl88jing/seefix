@@ -95,7 +95,7 @@ export default function Lab() {
   const [step, setStep] = useState("Turn off the water supply valve and flush to drain the tank before removing the flapper.");
   const [results, setResults] = useState<Record<string, Result>>({});
   const [busy, setBusy] = useState<Record<string, boolean>>({});
-  const [health, setHealth] = useState<Record<string, boolean> | null>(null);
+  const [health, setHealth] = useState<Record<string, boolean | string | null> | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -195,7 +195,9 @@ export default function Lab() {
       {health && (
         <p className="mt-2 font-mono text-xs text-zinc-500">
           {Object.entries(health)
-            .map(([k, v]) => `${k}: ${v ? "set" : "missing"}`)
+            .map(([k, v]) =>
+              typeof v === "boolean" ? `${k}: ${v ? "set" : "missing"}` : `${k}: ${v ?? "none"}`,
+            )
             .join("  ·  ")}
         </p>
       )}
@@ -219,8 +221,8 @@ export default function Lab() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <section className="rounded-xl border border-zinc-800 p-5">
-          <h2 className="font-medium">Identify · Muse Spark</h2>
-          <p className="text-sm text-zinc-400">Upload a model-plate photo.</p>
+          <h2 className="font-medium">Identify · Muse Spark Open (Baseten)</h2>
+          <p className="text-sm text-zinc-400">Upload a model-plate photo. Rate-limited; uses Baseten when configured.</p>
           <button disabled={!img || busy.identify} onClick={() => run("identify", "/api/identify", {})} className="mt-3 rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-zinc-950 disabled:opacity-40">
             POST /api/identify
           </button>

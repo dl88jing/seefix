@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { MODELS, metaApiKey, missingEnv } from "@/lib/env";
+import { MODELS, sparkMissingEnvName, sparkProvider, missingEnv } from "@/lib/env";
 import { badRequest, upstreamError } from "@/lib/http";
 import { InputError, readImageInput } from "@/lib/image";
-import { metaClient } from "@/lib/meta";
+import { sparkClient, sparkMessageText } from "@/lib/meta";
+import { sparkRateLimit } from "@/lib/ratelimit";
 import { ApplianceID, ApplianceIDJsonSchema } from "@/lib/schemas";
 
 export const runtime = "nodejs";
@@ -14,7 +15,8 @@ appliance_family is a short lowercase noun (toilet, dishwasher, washer, dryer, r
 confidence is your 0..1 confidence that brand and model are read correctly.`;
 
 export async function POST(req: Request) {
-  if (!metaApiKey()) return missingEnv("META_API_KEY", "appliance identification (Muse Spark)");
+  const provider = sparkProvider();
+  if (!provider) return missingEnv(sparkMissingEnvName(), "appliance identification (Muse Spark)");
 
   let input;
   try {
@@ -24,8 +26,12 @@ export async function POST(req: Request) {
     throw e;
   }
 
+  // Meter before spending Baseten / Meta credits.
+  const rl = await sparkRateLimit(req);
+  if (rl.deny) return rl.deny;
+
   try {
-    const client = metaClient();
+    const client = sparkClient();
     const completion = await client.chat.completions.create({
       model: MODELS.spark,
       messages: [
@@ -38,13 +44,31 @@ export async function POST(req: Request) {
           ],
         },
       ],
+      // Muse Spark Open is a reasoning model; content can be null if this is too small.
+      max_tokens: 4096,
       response_format: {
         type: "json_schema",
         json_schema: { name: "appliance_id", strict: true, schema: ApplianceIDJsonSchema as unknown as Record<string, unknown> },
       },
     });
 
-    const content = completion.choices[0]?.message?.content ?? "";
+    const message = completion.choices[0]?.message as {
+      content?: string | null;
+      reasoning_content?: string | null;
+    } | undefined;
+    const { text: content, reasoningChars } = sparkMessageText(message);
+    if (!content) {
+      return NextResponse.json(
+        {
+          error: "invalid_model_output",
+          message:
+            "model returned empty content (reasoning models need generous max_tokens; raise max_tokens if reasoning_chars is large)",
+          reasoning_chars: reasoningChars,
+          finish_reason: completion.choices[0]?.finish_reason ?? null,
+        },
+        { status: 502 },
+      );
+    }
     let raw: unknown;
     try {
       raw = JSON.parse(content);
@@ -58,8 +82,17 @@ export async function POST(req: Request) {
         { status: 502 },
       );
     }
-    return NextResponse.json({ model: MODELS.spark, appliance: parsed.data, usage: completion.usage ?? null });
+    return NextResponse.json(
+      {
+        model: MODELS.spark,
+        provider,
+        appliance: parsed.data,
+        usage: completion.usage ?? null,
+        reasoning_chars: reasoningChars || undefined,
+      },
+      { headers: rl.headers },
+    );
   } catch (e) {
-    return upstreamError("meta:" + MODELS.spark, e);
+    return upstreamError(`spark:${provider}:` + MODELS.spark, e);
   }
 }

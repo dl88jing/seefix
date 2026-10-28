@@ -43,7 +43,7 @@ export function metaNotActive(source: string, err: unknown) {
 
 /** Map an upstream (Meta API / Glimmer) failure to a JSON error response. */
 export function upstreamError(source: string, err: unknown) {
-  if (source.startsWith("meta:") && isMetaBillingError(err)) return metaNotActive(source, err);
+  if ((source.startsWith("meta:") || source.startsWith("spark:meta:")) && isMetaBillingError(err)) return metaNotActive(source, err);
   const e = err as UpstreamErr;
   const status = typeof e?.status === "number" ? e.status : 502;
   // Never echo request headers or keys; only the upstream message.

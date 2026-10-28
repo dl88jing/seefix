@@ -119,18 +119,27 @@ def serve():
 
 
 # ---------------------------------------------------------------------------
-# Quota service: the authoritative rate limiter for the public /api/safety route.
-# A tiny CPU function (scale-to-zero, one container, serialized with a lock) keeps
-# counters in a Modal Dict so limits hold across every Vercel instance:
-#   - SAFETY_PER_IP_PER_HOUR per hashed IP (sliding 1 h window), default 10
-#   - SAFETY_GLOBAL_PER_DAY for the whole site (UTC day), default 100
+# Quota service: authoritative rate limiter for public /api/safety and
+# /api/identify (Muse Spark via Baseten). A tiny CPU function (scale-to-zero,
+# one container, serialized with a lock) keeps counters in a Modal Dict so
+# limits hold across every Vercel instance. Request body may include
+# `bucket` ("safety" | "spark"; default "safety"):
+#   - safety: SAFETY_PER_IP_PER_HOUR / SAFETY_GLOBAL_PER_DAY (defaults 10 / 100)
+#   - spark:  SPARK_PER_IP_PER_HOUR  / SPARK_GLOBAL_PER_DAY  (defaults 20 / 200)
 # Vercel sends only an HMAC of the client IP, never the raw IP.
 # ---------------------------------------------------------------------------
 PER_IP_PER_HOUR = int(os.environ.get("SAFETY_PER_IP_PER_HOUR", "10"))
 GLOBAL_PER_DAY = int(os.environ.get("SAFETY_GLOBAL_PER_DAY", "100"))
+SPARK_PER_IP_PER_HOUR = int(os.environ.get("SPARK_PER_IP_PER_HOUR", "20"))
+SPARK_GLOBAL_PER_DAY = int(os.environ.get("SPARK_GLOBAL_PER_DAY", "200"))
 
 quota_image = modal.Image.debian_slim(python_version="3.12").pip_install("fastapi[standard]").env(
-    {"SAFETY_PER_IP_PER_HOUR": str(PER_IP_PER_HOUR), "SAFETY_GLOBAL_PER_DAY": str(GLOBAL_PER_DAY)}
+    {
+        "SAFETY_PER_IP_PER_HOUR": str(PER_IP_PER_HOUR),
+        "SAFETY_GLOBAL_PER_DAY": str(GLOBAL_PER_DAY),
+        "SPARK_PER_IP_PER_HOUR": str(SPARK_PER_IP_PER_HOUR),
+        "SPARK_GLOBAL_PER_DAY": str(SPARK_GLOBAL_PER_DAY),
+    }
 )
 quota_dict = modal.Dict.from_name("seefix-glimmer-quota", create_if_missing=True)
 
@@ -156,35 +165,47 @@ def quota():
 
     web = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
     lock = asyncio.Lock()
-    per_ip = int(os.environ["SAFETY_PER_IP_PER_HOUR"])
-    per_day = int(os.environ["SAFETY_GLOBAL_PER_DAY"])
+    limits = {
+        "safety": (
+            int(os.environ["SAFETY_PER_IP_PER_HOUR"]),
+            int(os.environ["SAFETY_GLOBAL_PER_DAY"]),
+        ),
+        "spark": (
+            int(os.environ["SPARK_PER_IP_PER_HOUR"]),
+            int(os.environ["SPARK_GLOBAL_PER_DAY"]),
+        ),
+    }
     expected = os.environ.get("GLIMMER_API_KEY", "")
 
     class Check(BaseModel):
         key: str
+        bucket: str = "safety"
 
     @web.post("/check")
     async def check(body: Check, authorization: str = Header(default="")):
         if not expected or not hmac.compare_digest(authorization, f"Bearer {expected}"):
             raise HTTPException(status_code=401, detail="unauthorized")
+        bucket = body.bucket if body.bucket in limits else "safety"
+        per_ip, per_day = limits[bucket]
         key = body.key[:64]
         now = time.time()
         day = time.strftime("%Y-%m-%d", time.gmtime(now))
         async with lock:
-            day_key = f"day:{day}"
+            day_key = f"{bucket}:day:{day}"
             used_today = await quota_dict.get.aio(day_key, 0)
             if used_today >= per_day:
                 retry = int(86400 - (now % 86400)) + 1
-                return {"allowed": False, "scope": "global", "retry_after": retry}
-            ip_key = f"ip:{key}"
+                return {"allowed": False, "scope": "global", "retry_after": retry, "bucket": bucket}
+            ip_key = f"{bucket}:ip:{key}"
             hits = [t for t in await quota_dict.get.aio(ip_key, []) if now - t < 3600]
             if len(hits) >= per_ip:
-                return {"allowed": False, "scope": "ip", "retry_after": int(hits[0] + 3600 - now) + 1}
+                return {"allowed": False, "scope": "ip", "retry_after": int(hits[0] + 3600 - now) + 1, "bucket": bucket}
             hits.append(now)
             await quota_dict.put.aio(ip_key, hits)
             await quota_dict.put.aio(day_key, used_today + 1)
             return {
                 "allowed": True,
+                "bucket": bucket,
                 "remaining_ip": per_ip - len(hits),
                 "remaining_global": per_day - used_today - 1,
             }

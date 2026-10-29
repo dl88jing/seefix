@@ -53,3 +53,11 @@ modal/.env*
 *_api_key
 __pycache__/
 *.pyc
+
+# Video pipeline local deps / raw captures (keep renders + composition)
+video/.venv/
+video/node_modules/
+video/captures/raw-video/
+video/package-lock.json
+video/captures/*.webm
+video/renders/frames/

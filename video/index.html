@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1920, height=1080"/>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#09090b}
+#root{width:1920px;height:1080px;position:relative;font-family:Inter,system-ui,sans-serif;color:#fafafa}
+.scene{position:absolute;inset:0;background:
+  radial-gradient(1200px 700px at 20% -10%, rgba(16,185,129,.18), transparent 55%),
+  radial-gradient(900px 600px at 100% 110%, rgba(52,211,153,.08), transparent 50%),
+  #09090b}
+.kicker{position:absolute;left:96px;top:72px;font-size:22px;letter-spacing:.22em;text-transform:uppercase;color:#34d399;font-weight:600}
+h1{position:absolute;left:96px;top:140px;font-size:84px;line-height:1.02;letter-spacing:-.035em;font-weight:800;width:920px}
+.sub{position:absolute;left:96px;top:420px;font-size:30px;line-height:1.4;color:#a1a1aa;width:820px;font-weight:500}
+.shot-wrap{position:absolute;right:72px;top:120px;width:860px;height:620px;border-radius:20px;overflow:hidden;
+  border:1px solid rgba(63,63,70,.9);box-shadow:0 40px 100px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.04);background:#000}
+.shot-wrap img,.shot-wrap video{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.caption{position:absolute;left:96px;right:96px;bottom:56px;display:flex;align-items:center;gap:18px}
+.caption .pill{background:rgba(24,24,27,.92);border:1px solid #3f3f46;border-radius:999px;padding:14px 28px;
+  font-size:26px;font-weight:600;color:#e4e4e7;backdrop-filter:blur(8px);max-width:1400px}
+.badge{margin-left:auto;font-size:20px;color:#71717a;font-weight:500;letter-spacing:.04em}
+.arch{position:absolute;right:72px;top:160px;width:860px;display:grid;gap:18px}
+.arch .card{border-radius:16px;border:1px solid #27272a;background:linear-gradient(180deg,#18181b,#0c0c0e);padding:22px 26px}
+.arch .card .t{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:18px;color:#34d399;letter-spacing:.04em}
+.arch .card .h{font-size:32px;font-weight:700;margin-top:6px}
+.arch .card .d{font-size:22px;color:#a1a1aa;margin-top:8px;line-height:1.35}
+.cta-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.cta-center h1{position:static;width:auto;font-size:120px;margin-bottom:18px}
+.cta-center .tag{font-size:36px;color:#a1a1aa;margin-bottom:36px}
+.cta-center .urls{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:28px;color:#34d399;line-height:1.7}
+.cta-center .credit{margin-top:40px;font-size:22px;color:#71717a;letter-spacing:.08em;text-transform:uppercase}
+.glow{position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(52,211,153,.25),transparent 70%);filter:blur(10px);pointer-events:none}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="76.126" data-width="1920" data-height="1080" data-fps="30">
+<section id="s0" class="clip scene" data-start="0.000" data-duration="9.787" data-track-index="0">
+<div class="kicker">HOOK</div>
+<h1>2 AM. The toilet<br>won’t stop running.</h1>
+<p class="sub">Avery has never replaced a flapper — and doesn’t know which part fits.</p>
+<div class="shot-wrap" id="s0-shot"><img src="assets/shot-landing.png" alt=""/></div>
+<div class="caption"><div class="pill">2 AM. The toilet won't stop.</div><div class="badge">SeeFix · Green Robin Labs</div></div>
+</section>
+<section id="s1" class="clip scene" data-start="9.787" data-duration="10.065" data-track-index="0">
+<div class="kicker">THE GAP</div>
+<h1>Wrong parts.<br>No proof.</h1>
+<p class="sub">Guesswork DIY leaves renters unsafe and weekend fixers unsure.</p>
+<div class="shot-wrap" id="s1-shot"><img src="assets/shot-how.png" alt=""/></div>
+<div class="caption"><div class="pill">Wrong parts. No proof.</div><div class="badge">SeeFix · Green Robin Labs</div></div>
+</section>
+<section id="s2" class="clip scene" data-start="19.852" data-duration="16.657" data-track-index="0">
+<div class="kicker">LIVE DEMO</div>
+<h1>Muse Spark Open<br>reads the plate.</h1>
+<p class="sub">American Standard · Cadet 3 · confidence 1.0 · provider baseten</p>
+<div class="shot-wrap" id="s2-shot"><img src="assets/shot-lab-result.png" alt="Live Muse Spark identify"/></div>
+<div class="caption"><div class="pill">Live identify on Muse Spark Open.</div><div class="badge">SeeFix · live · seefix.vercel.app</div></div>
+</section>
+<section id="s3" class="clip scene" data-start="36.509" data-duration="15.206" data-track-index="0">
+<div class="kicker">ARCHITECTURE</div>
+<h1>Spark · Glimmer ·<br>rate limits.</h1>
+<p class="sub">Baseten inference · Modal safety gate · fail-closed quotas</p>
+<div class="arch" id="s3-arch">
+  <div class="card"><div class="t">/api/identify</div><div class="h">Muse Spark Open</div><div class="d">Vision → typed JSON on Baseten · meta-models/muse-spark-open-1026</div></div>
+  <div class="card"><div class="t">/api/safety</div><div class="h">Muse Glimmer · Modal</div><div class="d">Open-weights safety gate on H100 · stops gas, mains, scald</div></div>
+  <div class="card"><div class="t">quota</div><div class="h">Rate limits</div><div class="d">Spark 20/hr IP · 200/day global · fail-closed on Vercel</div></div>
+</div>
+<div class="caption"><div class="pill">Spark · Glimmer · rate limits.</div><div class="badge">SeeFix · Green Robin Labs</div></div>
+</section>
+<section id="s4" class="clip scene" data-start="51.715" data-duration="10.043" data-track-index="0">
+<div class="kicker">WHY IT MATTERS</div>
+<h1>See the part.<br>Check the work.</h1>
+<p class="sub">SAM finds the flapper. Muse Image draws the step. Glimmer stops the danger.</p>
+<div class="shot-wrap" id="s4-shot"><img src="assets/shot-lab-upload.png" alt=""/></div>
+<div class="caption"><div class="pill">See the part. Check the work.</div><div class="badge">SeeFix · Green Robin Labs</div></div>
+</section>
+<section id="s5" class="clip scene" data-start="61.758" data-duration="14.368" data-track-index="0">
+<div class="glow" style="left:200px;top:120px"></div>
+<div class="glow" style="right:160px;bottom:80px"></div>
+<div class="cta-center" id="s5-inner">
+  <div class="kicker" style="position:static;margin-bottom:18px">TRY IT</div>
+  <h1>SeeFix</h1>
+  <div class="tag">It sees the part. It checks your work.</div>
+  <div class="urls">seefix.vercel.app<br/>github.com/dl88jing/seefix</div>
+  <div class="credit">Green Robin Labs · Meta Global AI Developer Hackathon</div>
+</div>
+<div class="caption"><div class="pill">seefix.vercel.app</div></div>
+</section>
+<audio id="vo1" src="assets/audio/vo1.wav" data-start="0.000" data-duration="9.237" data-track-index="1" data-volume="1"></audio>
+<audio id="vo2" src="assets/audio/vo2.wav" data-start="9.787" data-duration="9.515" data-track-index="1" data-volume="1"></audio>
+<audio id="vo3" src="assets/audio/vo3.wav" data-start="19.852" data-duration="16.107" data-track-index="1" data-volume="1"></audio>
+<audio id="vo4" src="assets/audio/vo4.wav" data-start="36.509" data-duration="14.656" data-track-index="1" data-volume="1"></audio>
+<audio id="vo5" src="assets/audio/vo5.wav" data-start="51.715" data-duration="9.493" data-track-index="1" data-volume="1"></audio>
+<audio id="vo6" src="assets/audio/vo6.wav" data-start="61.758" data-duration="13.568" data-track-index="1" data-volume="1"></audio>
+<script>
+const tl=gsap.timeline({paused:true});
+tl.from("#s0 .kicker, #s0 h1, #s0 .sub, #s0 .pill, #s0 .badge, #s0 .tag, #s0 .urls, #s0 .credit",{opacity:0,y:28,duration:0.7,stagger:0.1,ease:"power2.out"},0.120);
+tl.from("#s0-shot",{x:70,opacity:0,duration:1.0,ease:"power3.out"},0.280);
+tl.to("#s0-shot",{scale:1.04,duration:8.287,ease:"none"},1.100);
+tl.from("#s1 .kicker, #s1 h1, #s1 .sub, #s1 .pill, #s1 .badge, #s1 .tag, #s1 .urls, #s1 .credit",{opacity:0,y:28,duration:0.7,stagger:0.1,ease:"power2.out"},9.907);
+tl.from("#s1-shot",{x:70,opacity:0,duration:1.0,ease:"power3.out"},10.067);
+tl.to("#s1-shot",{scale:1.04,duration:8.565,ease:"none"},10.887);
+tl.from("#s2 .kicker, #s2 h1, #s2 .sub, #s2 .pill, #s2 .badge, #s2 .tag, #s2 .urls, #s2 .credit",{opacity:0,y:28,duration:0.7,stagger:0.1,ease:"power2.out"},19.972);
+tl.from("#s2-shot",{x:70,opacity:0,duration:1.0,ease:"power3.out"},20.132);
+tl.to("#s2-shot",{scale:1.04,duration:15.157,ease:"none"},20.952);
+tl.from("#s3 .kicker, #s3 h1, #s3 .sub, #s3 .pill, #s3 .badge, #s3 .tag, #s3 .urls, #s3 .credit",{opacity:0,y:28,duration:0.7,stagger:0.1,ease:"power2.out"},36.629);
+tl.from("#s3-arch .card",{opacity:0,x:40,duration:0.65,stagger:0.15,ease:"power2.out"},36.859);
+tl.from("#s4 .kicker, #s4 h1, #s4 .sub, #s4 .pill, #s4 .badge, #s4 .tag, #s4 .urls, #s4 .credit",{opacity:0,y:28,duration:0.7,stagger:0.1,ease:"power2.out"},51.835);
+tl.from("#s4-shot",{x:70,opacity:0,duration:1.0,ease:"power3.out"},51.995);
+tl.to("#s4-shot",{scale:1.04,duration:8.543,ease:"none"},52.815);
+tl.from("#s5 .kicker, #s5 h1, #s5 .sub, #s5 .pill, #s5 .badge, #s5 .tag, #s5 .urls, #s5 .credit",{opacity:0,y:28,duration:0.7,stagger:0.1,ease:"power2.out"},61.878);
+tl.from("#s5-inner",{opacity:0,scale:0.96,duration:0.9,ease:"power3.out"},61.908);
+window.__timelines = window.__timelines || {};
+window.__timelines["main"]=tl; tl.seek(0);
+</script>
+</div>
+</body>
+</html>

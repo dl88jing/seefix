@@ -1,0 +1,9 @@
+{
+  "name": "seefix-demo-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "npx --yes hyperframes@0.8.60 render",
+    "check": "npx --yes hyperframes@0.8.60 check"
+  }
+}

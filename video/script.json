@@ -1,0 +1,38 @@
+[
+  {
+    "id": "vo1",
+    "file": "vo1.wav",
+    "caption": "2 AM. The toilet won't stop.",
+    "text": "Two A M. The toilet will not stop running. Avery, a first-time renter, has never replaced a flapper \u2014 and has no idea which part even fits."
+  },
+  {
+    "id": "vo2",
+    "file": "vo2.wav",
+    "caption": "Wrong parts. No proof.",
+    "text": "Wrong parts from a late-night hardware run. Guesswork YouTube. No proof the job is safe, or actually done. That is the repair gap SeeFix closes."
+  },
+  {
+    "id": "vo3",
+    "file": "vo3.wav",
+    "caption": "Live identify on Muse Spark Open.",
+    "text": "Live right now on seefix.vercel.app. Drop a model-plate photo into the lab. Muse Spark Open, served on Baseten, reads the plate in seconds \u2014 American Standard, Cadet three, serial, appliance family toilet, confidence one. Nothing mocked."
+  },
+  {
+    "id": "vo4",
+    "file": "vo4.wav",
+    "caption": "Spark \u00b7 Glimmer \u00b7 rate limits.",
+    "text": "Under the hood: Muse Spark Open for vision JSON via Baseten. Muse Glimmer, Meta's open-weights safety model, self-hosted on Modal. Per-IP and global daily rate limits so the public demo stays fair and fail-closed."
+  },
+  {
+    "id": "vo5",
+    "file": "vo5.wav",
+    "caption": "See the part. Check the work.",
+    "text": "Next, SAM finds the flapper on your own photo. Muse Image draws the step. Glimmer stops gas, live mains, or scald risk before you touch it."
+  },
+  {
+    "id": "vo6",
+    "file": "vo6.wav",
+    "caption": "seefix.vercel.app",
+    "text": "It sees the part. It checks your work. Open the live app at seefix.vercel.app, try the lab, and star the repo on GitHub. SeeFix by Green Robin Labs \u2014 for the Meta Global AI Developer Hackathon."
+  }
+]

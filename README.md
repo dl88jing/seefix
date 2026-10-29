@@ -8,6 +8,18 @@ Hero demo: **replacing a worn toilet flapper**. Avery (first-time renter) has a 
 
 **Live app:** https://seefix.vercel.app · **Model test bench:** https://seefix.vercel.app/lab
 
+
+## Demo video
+
+Narrated HyperFrames + Kokoro walkthrough of the live app (Muse Spark Open identify via Baseten, Glimmer safety gate, rate limits):
+
+[![SeeFix demo](video/renders/seefix-demo-poster.png)](https://github.com/dl88jing/seefix/releases/latest/download/seefix-demo.mp4)
+
+- **Video:** [seefix-demo.mp4](https://github.com/dl88jing/seefix/releases/latest/download/seefix-demo.mp4) (also in [`video/renders/seefix-demo.mp4`](video/renders/seefix-demo.mp4))
+- **Poster:** [`video/renders/seefix-demo-poster.png`](video/renders/seefix-demo-poster.png)
+- **Live app:** https://seefix.vercel.app · **Lab:** https://seefix.vercel.app/lab
+
+
 Built by team **Northbridge** for the Meta AI Developer Hackathon (Indie track).
 
 ---

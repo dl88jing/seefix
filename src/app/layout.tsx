@@ -6,7 +6,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "SeeFix by Northbridge",
+  title: "SeeFix · Green Robin Labs",
   description: "A repair copilot that sees the part and checks your work. Built on Meta Muse Spark, SAM 3.1, Muse Image and Muse Glimmer.",
 };
 

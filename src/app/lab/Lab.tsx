@@ -185,7 +185,7 @@ export default function Lab() {
       <div className="flex items-baseline justify-between">
         <h1 className="text-3xl font-semibold">SeeFix Lab</h1>
         <Link href="/" className="text-sm text-zinc-400 hover:text-zinc-200">
-          ← SeeFix by Northbridge
+          ← SeeFix · Green Robin Labs
         </Link>
       </div>
       <p className="mt-2 text-zinc-400">

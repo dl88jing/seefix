@@ -1,4 +1,4 @@
-# SeeFix by Northbridge
+# SeeFix
 
 > **It sees the part. It checks your work.**
 
@@ -20,7 +20,7 @@ Narrated HyperFrames + Kokoro walkthrough of the live app (Muse Spark Open ident
 - **Live app:** https://seefix.vercel.app · **Lab:** https://seefix.vercel.app/lab
 
 
-Built by team **Northbridge** for the Meta AI Developer Hackathon (Indie track).
+Built by **Green Robin Labs** for the Meta Global AI Developer Hackathon (Indie track).
 
 ---
 
@@ -28,7 +28,7 @@ Built by team **Northbridge** for the Meta AI Developer Hackathon (Indie track).
 
 **All code in this repository was written during the Meta AI Developer Hackathon build window, starting Oct 26, 2026.** The commit history starts on Oct 26, 2026; nothing was ported from an earlier project.
 
-Original work by Northbridge (everything under `src/` and `modal/`):
+Original work by Green Robin Labs (everything under `src/` and `modal/`):
 
 - The inference integration layer (`src/lib/*`): Muse Spark Open via Baseten (preferred) with Meta Model API fallback for Spark structured output, SAM 3.1 streaming segmentation, Muse Image edits, input validation and the "no mock data" 503 contract.
 - API routes `/api/identify`, `/api/segment`, `/api/card`, `/api/safety`, `/api/health`.
@@ -78,7 +78,7 @@ Models used: `meta-models/muse-spark-open-1026` (Muse Spark Open via Baseten), p
  Data: Neon Postgres (Drizzle) · Vercel Blob (clips, cards) · Upstash (rate limit) · /evals
 ```
 
-**Status (day one):** `/api/identify`, `/api/segment`, `/api/card`, `/api/safety` and `/api/health` are implemented and exercised from `/lab`. `/api/plan`, `/api/verify`, `/api/asr`, `/api/recap`, the live camera loop and the data layer are next.
+**Status:** `/api/identify`, `/api/segment`, `/api/card`, `/api/safety` and `/api/health` are live on Vercel and exercised from `/lab` (identify via Muse Spark Open / Baseten; safety via Glimmer on Modal with fail-closed rate limits). `/api/plan`, `/api/verify`, `/api/asr`, `/api/recap`, the continuous camera loop and the data layer are next.
 
 ### Routes
 
@@ -147,7 +147,7 @@ Each Vercel instance also pre-checks the per-IP window in memory. Over the limit
 
 **Meta API not yet active.** If the Meta account has no billing yet, Meta returns HTTP 402 `billing_error` / `billing_not_configured`. Meta-backed routes (and Spark when falling back to Meta) turn that into HTTP 503 `{"error":"meta_api_not_active"}` and `/lab` shows a "Meta API not yet active" notice instead of a raw error.
 
-Day-one status: the gate is deployed on Modal (H100, scale-to-zero, max one container) and answers `/v1/models` and chat requests; a cold start with cached weights takes about 2.5 minutes. The `vllm/vllm-openai:muse-glimmer` build does not enforce `response_format` JSON schemas for Glimmer, so `/api/safety` asks for the JSON shape in the prompt, extracts the object and validates it with zod (a missing `hazard` is derived from `severity` and reported in a `normalized` field).
+Status: the gate is deployed on Modal (H100, scale-to-zero, max one container) and answers `/v1/models` and chat requests; a cold start with cached weights takes about 2.5 minutes. The `vllm/vllm-openai:muse-glimmer` build does not enforce `response_format` JSON schemas for Glimmer, so `/api/safety` asks for the JSON shape in the prompt, extracts the object and validates it with zod (a missing `hazard` is derived from `severity` and reported in a `normalized` field).
 
 ### Deploy the app
 
@@ -158,6 +158,23 @@ vercel env add BASETEN_MODEL production
 # Also keep GLIMMER_* and META_API_KEY (for SAM / Muse Image) on production.
 vercel --prod
 ```
+
+---
+
+
+## Hackathon submission package
+
+Paste-ready Cerebral Valley field copy, cover, gallery, and pitch deck:
+
+| Asset | Path |
+|---|---|
+| Field copy | [`submission.md`](submission.md) |
+| Cover | [`submission/cover.png`](submission/cover.png) |
+| Gallery (5) | [`submission/gallery/`](submission/gallery/) |
+| Pitch deck (PDF) | [`submission/deck/seefix-pitch.pdf`](submission/deck/seefix-pitch.pdf) |
+| Demo video | [`video/renders/seefix-demo.mp4`](video/renders/seefix-demo.mp4) (~76s) |
+
+Submit at [Cerebral Valley](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/submit) before **Wed Nov 4, 2026 9:00 PM ET**. Affiliation: **Green Robin Labs**.
 
 ---
 

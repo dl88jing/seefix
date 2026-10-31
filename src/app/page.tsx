@@ -10,7 +10,7 @@ const steps = [
 export default function Home() {
   return (
     <main className="mx-auto max-w-5xl px-6 py-16">
-      <p className="text-sm uppercase tracking-widest text-emerald-400">SeeFix by Northbridge</p>
+      <p className="text-sm uppercase tracking-widest text-emerald-400">SeeFix · Green Robin Labs</p>
       <h1 className="mt-3 text-5xl font-semibold leading-tight">
         It sees the part.
         <br />
@@ -58,11 +58,16 @@ export default function Home() {
         <a href="https://github.com/dl88jing/seefix" className="rounded-lg border border-zinc-700 px-5 py-3 hover:bg-zinc-900">
           Source on GitHub
         </a>
+        <a
+          href="https://github.com/dl88jing/seefix/releases/latest/download/seefix-demo.mp4"
+          className="rounded-lg border border-zinc-700 px-5 py-3 hover:bg-zinc-900"
+        >
+          Watch demo (~76s)
+        </a>
       </div>
 
       <p className="mt-16 text-sm text-zinc-500">
-        Built by team Northbridge during the Meta AI Developer Hackathon (Oct 26 to Nov 4, 2026). Day-one build: the lab
-        exercises each model route; the live camera loop lands next.
+        Built by Green Robin Labs for the Meta Global AI Developer Hackathon (Indie · Oct 26–Nov 4, 2026). Live lab exercises identify, segment, card, and safety; camera verify loop next.
       </p>
     </main>
   );

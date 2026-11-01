@@ -11,12 +11,12 @@ Hero demo: **replacing a worn toilet flapper**. Avery (first-time renter) has a 
 
 ## Demo video
 
-Narrated HyperFrames + Kokoro walkthrough of the live app (Muse Spark Open identify via Baseten, SAM 3.1, Muse Image, Glimmer safety gate, rate limits):
+Simulated-user Playwright screen recording of the live app (Muse Spark Open identify via Baseten on `/lab`), narrated with HyperFrames + Kokoro. Screen footage is ~75% of runtime.
 
-[![SeeFix demo](video/renders/seefix-demo-poster.png)](https://youtu.be/HB-MryYy2qg)
+[![SeeFix demo](video/renders/seefix-demo-poster.png)](https://github.com/dl88jing/seefix/releases/download/v0.2.0/seefix-demo-v2.mp4)
 
-- **YouTube:** https://youtu.be/HB-MryYy2qg (~76s)
-- **MP4:** [seefix-demo.mp4](https://github.com/dl88jing/seefix/releases/latest/download/seefix-demo.mp4) (also in [`video/renders/seefix-demo.mp4`](video/renders/seefix-demo.mp4))
+- **MP4 (v2, screen recording):** [seefix-demo-v2.mp4](https://github.com/dl88jing/seefix/releases/download/v0.2.0/seefix-demo-v2.mp4) (~112s · also [`video/renders/seefix-demo-v2.mp4`](video/renders/seefix-demo-v2.mp4))
+- **YouTube (v1, will update):** https://youtu.be/HB-MryYy2qg
 - **Poster:** [`video/renders/seefix-demo-poster.png`](video/renders/seefix-demo-poster.png)
 - **Live app:** https://seefix.vercel.app · **Lab:** https://seefix.vercel.app/lab
 
@@ -184,7 +184,7 @@ vercel --prod
 |---|---|
 | Live app | https://seefix.vercel.app |
 | Model lab | https://seefix.vercel.app/lab |
-| Demo video | https://youtu.be/HB-MryYy2qg |
+| Demo video | [seefix-demo-v2.mp4](https://github.com/dl88jing/seefix/releases/download/v0.2.0/seefix-demo-v2.mp4) |
 | Source | https://github.com/dl88jing/seefix |
 
 ```bash
@@ -222,9 +222,9 @@ Paste-ready Cerebral Valley field copy, cover, gallery, and pitch deck:
 | Cover | [`submission/cover.png`](submission/cover.png) |
 | Gallery (5) | [`submission/gallery/`](submission/gallery/) |
 | Pitch deck (PDF) | [`submission/deck/seefix-pitch.pdf`](submission/deck/seefix-pitch.pdf) |
-| Demo video | [`video/renders/seefix-demo.mp4`](video/renders/seefix-demo.mp4) (~76s) |
+| Demo video | [`seefix-demo-v2.mp4`](https://github.com/dl88jing/seefix/releases/download/v0.2.0/seefix-demo-v2.mp4) (~112s) |
 
-Submit at [Cerebral Valley](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/submit) before **Wed Nov 4, 2026 9:00 PM ET** (= **6:00 PM PT** after DST ends Nov 1; PT is UTC-8). Affiliation: **Green Robin Labs**. Demo: https://youtu.be/HB-MryYy2qg
+Submit at [Cerebral Valley](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/submit) before **Wed Nov 4, 2026 9:00 PM ET** (= **6:00 PM PT** after DST ends Nov 1; PT is UTC-8). Affiliation: **Green Robin Labs**. Demo: https://github.com/dl88jing/seefix/releases/download/v0.2.0/seefix-demo-v2.mp4
 
 ---
 

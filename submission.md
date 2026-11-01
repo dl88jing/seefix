@@ -23,7 +23,7 @@
 | Theme | **Build for Your World** (also fits Push the Frontier — closed-loop physical verify; pick one: Build for Your World) |
 | Public repo | https://github.com/dl88jing/seefix |
 | Working demo | https://seefix.vercel.app · lab https://seefix.vercel.app/lab |
-| Demo video | **≤ 3 minutes** (ours ~76s) — host typically YouTube/unlisted or public URL |
+| Demo video | **≤ 3 minutes** (ours ~112s v2) — host typically YouTube/unlisted or public URL |
 | New work only | Built during Oct 26–Nov 4 window |
 | Meta models | Must genuinely use Meta Model API and/or open weights |
 | Affiliation | **Green Robin Labs** (never Adobe) |
@@ -88,15 +88,16 @@ Lab / model bench: `https://seefix.vercel.app/lab`
 
 ### 8. Demo video URL
 ```
-https://youtu.be/HB-MryYy2qg
+https://github.com/dl88jing/seefix/releases/download/v0.2.0/seefix-demo-v2.mp4
+(YouTube refresh pending — was https://youtu.be/HB-MryYy2qg)
 ```
 Local / release backup (works for judges who accept direct MP4):
 ```
-https://github.com/dl88jing/seefix/releases/latest/download/seefix-demo.mp4
+https://github.com/dl88jing/seefix/releases/download/v0.2.0/seefix-demo-v2.mp4
 ```
 - Duration: ~76 seconds (under 3-minute cap)
 - YouTube title: "SeeFix — snap a photo, get a verified repair plan (Meta Muse Spark demo)"
-- Path: `video/renders/seefix-demo.mp4`
+- Path: `video/renders/seefix-demo-v2.mp4`
 - Poster: `video/renders/seefix-demo-poster.png`
 - Stack: HyperFrames + Kokoro TTS (`af_heart`)
 
@@ -177,9 +178,9 @@ Update description / Meta-products fields if the form still shows older "Meta AP
 | Cover | `submission/cover.png` | yes |
 | Gallery ×5 | `submission/gallery/*.png` | yes |
 | Pitch PDF | `submission/deck/seefix-pitch.pdf` | yes |
-| Demo MP4 | `video/renders/seefix-demo.mp4` (~76s) | yes |
+| Demo MP4 | `video/renders/seefix-demo-v2.mp4` (~112s) | yes |
 | Field copy | this file | yes |
-| YouTube URL | https://youtu.be/HB-MryYy2qg | yes |
+| YouTube URL | https://youtu.be/HB-MryYy2qg (v1; swap to v2 when uploaded) | yes |
 | CV login + paste | portal | **needs human** |
 | Official Rules accept | CV details (login) | **needs human if not done** |
 | Meta credits claim | Google Form from Oct 26 blast | claim individually by Nov 4 9 PM ET |
@@ -189,7 +190,7 @@ Update description / Meta-products fields if the form still shows older "Meta AP
 ## Human blockers (cannot automate)
 
 1. **Sign in to Cerebral Valley** and open the submit form; confirm exact field labels / uploads; paste copy from this file.
-2. **Confirm YouTube URL** https://youtu.be/HB-MryYy2qg is in the video field (already public).
+2. **Confirm demo URL** points at v0.2.0 `seefix-demo-v2.mp4` (YouTube refresh pending).
 3. **Meta / CV login** for Official Rules acceptance, Discord, and any credit forms still unpaid (credits claim deadline = submission deadline).
 4. Optional: X post for viral bonus; attach cover/gallery/deck if the form offers uploads.
 5. **Re-save form after README/demo polish** if the portal still allows edits before Wed Nov 4, 2026 9:00 PM ET.

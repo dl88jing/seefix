@@ -61,3 +61,10 @@ video/captures/raw-video/
 video/package-lock.json
 video/captures/*.webm
 video/renders/frames/
+video/captures/check-frames/
+video/captures/*.log
+video/renders/v2-frames/
+video/renders/*.log
+video/captures/01-landing.mp4
+video/captures/02-lab-identify.mp4
+video/captures/03-lab-explore.mp4

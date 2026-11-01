@@ -58,8 +58,8 @@ export default function Home() {
         <a href="https://github.com/dl88jing/seefix" className="rounded-lg border border-zinc-700 px-5 py-3 hover:bg-zinc-900">
           Source on GitHub
         </a>
-        <a href="https://youtu.be/HB-MryYy2qg" className="rounded-lg border border-zinc-700 px-5 py-3 hover:bg-zinc-900">
-          Watch demo (~76s)
+        <a href="https://youtu.be/Mk7XkNJ0lXE" className="rounded-lg border border-zinc-700 px-5 py-3 hover:bg-zinc-900">
+          Watch demo (~112s)
         </a>
       </div>
 

@@ -88,8 +88,7 @@ Lab / model bench: `https://seefix.vercel.app/lab`
 
 ### 8. Demo video URL
 ```
-https://github.com/dl88jing/seefix/releases/download/v0.2.0/seefix-demo-v2.mp4
-(YouTube refresh pending — was https://youtu.be/HB-MryYy2qg)
+https://youtu.be/Mk7XkNJ0lXE
 ```
 Local / release backup (works for judges who accept direct MP4):
 ```
@@ -180,7 +179,7 @@ Update description / Meta-products fields if the form still shows older "Meta AP
 | Pitch PDF | `submission/deck/seefix-pitch.pdf` | yes |
 | Demo MP4 | `video/renders/seefix-demo-v2.mp4` (~112s) | yes |
 | Field copy | this file | yes |
-| YouTube URL | https://youtu.be/HB-MryYy2qg (v1; swap to v2 when uploaded) | yes |
+| YouTube URL | https://youtu.be/Mk7XkNJ0lXE | yes |
 | CV login + paste | portal | **needs human** |
 | Official Rules accept | CV details (login) | **needs human if not done** |
 | Meta credits claim | Google Form from Oct 26 blast | claim individually by Nov 4 9 PM ET |
@@ -190,7 +189,7 @@ Update description / Meta-products fields if the form still shows older "Meta AP
 ## Human blockers (cannot automate)
 
 1. **Sign in to Cerebral Valley** and open the submit form; confirm exact field labels / uploads; paste copy from this file.
-2. **Confirm demo URL** points at v0.2.0 `seefix-demo-v2.mp4` (YouTube refresh pending).
+2. **Confirm demo URL** is https://youtu.be/Mk7XkNJ0lXE (MP4 fallback: v0.2.0 `seefix-demo-v2.mp4`).
 3. **Meta / CV login** for Official Rules acceptance, Discord, and any credit forms still unpaid (credits claim deadline = submission deadline).
 4. Optional: X post for viral bonus; attach cover/gallery/deck if the form offers uploads.
 5. **Re-save form after README/demo polish** if the portal still allows edits before Wed Nov 4, 2026 9:00 PM ET.

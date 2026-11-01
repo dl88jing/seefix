@@ -12,7 +12,7 @@ echo "== SeeFix demo =="
 echo "Repo:  https://github.com/dl88jing/seefix"
 echo "Live:  $LIVE_URL"
 echo "Lab:   $LIVE_URL/lab"
-echo "Video: https://youtu.be/HB-MryYy2qg"
+echo "Video: https://youtu.be/Mk7XkNJ0lXE"
 echo
 
 echo "-- GET $LIVE_URL/api/health --"

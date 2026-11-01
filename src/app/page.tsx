@@ -66,7 +66,7 @@ export default function Home() {
       <p className="mt-16 text-sm text-zinc-500">
         Built by Green Robin Labs for the Meta Global AI Developer Hackathon (Indie · Oct 26–Nov 4, 2026). Lab routes call real models
         (Spark Open via Baseten, SAM 3.1 + Muse Image via Meta, Glimmer on Modal). Missing keys or inactive Meta billing return a labeled
-        503 — nothing is mocked. Continuous camera verify loop is next.
+        503 — nothing is mocked. Photo-based fix verification is live in /lab; the continuous camera verify loop is next.
       </p>
     </main>
   );

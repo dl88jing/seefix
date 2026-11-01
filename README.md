@@ -61,7 +61,7 @@ Models used: `meta-models/muse-spark-open-1026` (Muse Spark Open via Baseten), p
  ┌──────────────────────────────────────────────────────────────────────┐
  │ getUserMedia camera ──► keyframe sampler (2 fps) ──► /api/segment     │
  │ mic ─────────────────► /api/asr (realtime speech-to-text)             │
- │ "done" ──► 8 s clip ──► Vercel Blob ──► /api/verify                   │
+ │ "done" ──► after photo (+ optional before) ──► /api/verify            │
  └──────────────────────────────────────────────────────────────────────┘
                  │
                  ▼  Next.js 15 on Vercel (Node runtime)
@@ -69,7 +69,7 @@ Models used: `meta-models/muse-spark-open-1026` (Muse Spark Open via Baseten), p
  │ /api/identify  model plate ─► Muse Spark Open via Baseten (vision, JSON)   │
  │ /api/plan      appliance + symptom ─► Muse Spark Open repair plan          │
  │ /api/segment   frame + noun phrase ─► SAM 3.1 boxes + masks                │
- │ /api/verify    after-clip ─► SAM 3.1 + Muse Spark Open "is it fixed?"      │
+ │ /api/verify    after (+before) photo ─► Muse Spark Open "is it fixed?"     │
  │ /api/safety    frame + planned step ─► Muse Glimmer (vLLM on Modal)        │
  │ /api/card      frame + instruction ─► Muse Image edit (annotated card)     │
  │ /api/recap     session ─► shareable repair recap                           │
@@ -79,12 +79,13 @@ Models used: `meta-models/muse-spark-open-1026` (Muse Spark Open via Baseten), p
  Data: Neon Postgres (Drizzle) · Vercel Blob (clips, cards) · Upstash (rate limit) · /evals
 ```
 
-**Status (measured Sat Oct 31, 2026 ~10:30 PM PT against https://seefix.vercel.app):** `/api/identify`, `/api/segment`, `/api/card`, `/api/safety` and `/api/health` are live and called real models from `/lab` (no mocks). Identify uses Muse Spark Open on Baseten; SAM 3.1 + Muse Image hit the Meta Model API; safety uses Muse Glimmer on Modal (fail-closed rate limits). `/api/plan`, `/api/verify`, `/api/asr`, `/api/recap`, the continuous camera loop and the data layer are next.
+**Status (measured Sun Nov 1, 2026 ~6:35 AM PT against https://seefix.vercel.app):** `/api/identify`, `/api/verify`, `/api/segment`, `/api/card`, `/api/safety` and `/api/health` are live and call real models from `/lab` (no mocks). Identify and verify use Muse Spark Open on Baseten; SAM 3.1 + Muse Image hit the Meta Model API; safety uses Muse Glimmer on Modal (fail-closed rate limits). `/api/plan`, `/api/asr`, `/api/recap`, the continuous camera / video-clip verify loop and the data layer are next.
 
 | Route | Measured | Notes |
 |---|---|---|
 | `GET /api/health` | HTTP 200 | All keys configured; `spark_provider: baseten` |
 | `POST /api/identify` | HTTP 200 · ~9.3 s | `provider: baseten`, model `meta-models/muse-spark-open-1026` |
+| `POST /api/verify` | HTTP 200 · 5.6–10.2 s | Smoke checks on the sample plate photo: step "data plate legible" → `done` (0.98); step "flapper chain clipped" → `unclear` ("flapper, chain… not visible", asks for a retake). 4 live calls incl. one with a `before` photo, not an accuracy benchmark |
 | `POST /api/segment` | HTTP 200 · ~1.9 s | Meta `sam-3.1` (empty `objects` on a plate-only photo is expected) |
 | `POST /api/card` | HTTP 200 · ~20 s | Meta `muse-image-1.0` edit |
 | `POST /api/safety` | HTTP 200 · ~182 s cold | Modal Glimmer; warm calls are much faster |
@@ -96,6 +97,7 @@ Models used: `meta-models/muse-spark-open-1026` (Muse Spark Open via Baseten), p
 | Route | Input | Model | Output |
 |---|---|---|---|
 | `POST /api/identify` | `image` | Muse Spark Open (`meta-models/muse-spark-open-1026`) via Baseten Chat Completions + `response_format: json_schema` (strict); Meta `muse-spark-1.3` fallback | `{ appliance: { brand, model, serial, appliance_family, confidence }, provider }` (zod-validated) |
+| `POST /api/verify` | `image` (after photo), `step` (expected result), optional `before` (data URL, JSON only) | Muse Spark Open via Baseten, strict `json_schema` | `{ verdict: done \| not_done \| unclear, confidence, evidence, next_action, compared_with_before }` (zod-validated) |
 | `POST /api/segment` | `image`, `phrase` (short noun phrase, e.g. `toilet flapper`) | `sam-3.1` via Responses API, streaming, `mask_encoding=one_bit` | `{ objects: [{ id, box, confidence, mask }] }`; decode masks with `decodeMaskToRaster` |
 | `POST /api/card` | `image`, `instruction` | `muse-image-1.0` via `/v1/images/edits` | `{ image: "data:image/png;base64,..." }` |
 | `POST /api/safety` | `image`, `step` | Muse Glimmer 30B on Modal (OpenAI-compatible vLLM) | `{ hazard, severity, reason }` (zod-validated) |
@@ -113,9 +115,9 @@ Images can be sent as `multipart/form-data` (field `image`) or JSON (`{"image": 
 git clone https://github.com/dl88jing/seefix && cd seefix
 npm ci
 cp .env.example .env.local   # fill in values; .env.local is gitignored
-npm test                     # 19 unit tests, no API keys
+npm test                     # 26 unit tests, no API keys
 npm run dev                  # http://localhost:3000 and /lab
-./demo.sh                    # live health + tests; LIVE=1 to hit /api/identify
+./demo.sh                    # live health + tests; LIVE=1 to hit /api/identify + /api/verify
 ```
 
 ### Environment variables
@@ -195,19 +197,21 @@ curl -sS https://seefix.vercel.app/api/health | python3 -m json.tool
 # 2) One-command demo (health + unit tests; no keys needed locally)
 git clone https://github.com/dl88jing/seefix && cd seefix && npm ci && ./demo.sh
 
-# 3) Optional live identify against the public deploy (counts toward rate limits)
+# 3) Optional live identify + verify against the public deploy (counts toward rate limits)
 LIVE=1 ./demo.sh
 ```
 
-In `/lab`, upload any fixture photo (or `video/assets/sample-plate.jpg`) and click **Identify**, **Segment**, **Card**, and **Safety**. Identify should show `provider: "baseten"`. If a Meta route is billing-blocked you will see a labeled 503 banner, not fake JSON.
+In `/lab`, upload any fixture photo (or `video/assets/sample-plate.jpg`) and click **Identify**, **Segment**, **Card**, **Safety**, and **Verify** (the photo becomes the *after* shot; optionally add a *before* photo). Identify should show `provider: "baseten"`. If a Meta route is billing-blocked you will see a labeled 503 banner, not fake JSON.
 
 **Sponsor-stack honesty (what we actually call):**
-- Muse Spark Open (`meta-models/muse-spark-open-1026`) via **Baseten** — live identify
+- Muse Spark Open (`meta-models/muse-spark-open-1026`) via **Baseten** — live identify + fix verification
 - **SAM 3.1** + **Muse Image 1.0** via **Meta Model API** — live segment + card
 - **Muse Glimmer 30B** open weights on **Modal** (vLLM) — live safety gate
 - We do **not** claim Fireworks or Muse Wonder in the running paths
 
 **Bonus prizes we can honestly sit in:** Best Build on Open Weight Models (Spark Open + Glimmer); Best Creative Build (Muse Image cards). Agentic / viral / community-vote bonuses need the continuous verify loop or an X post — not claimed here.
+
+Note: the Glimmer safety gate on Modal can take ~2 min on a cold start; warm calls measured ~7 s (Nov 1).
 
 Architecture diagram: see ASCII above and [`docs/architecture.md`](docs/architecture.md).
 

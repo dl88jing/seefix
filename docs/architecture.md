@@ -12,6 +12,7 @@ flowchart TB
     Segment["POST /api/segment"]
     Card["POST /api/card"]
     Safety["POST /api/safety"]
+    Verify["POST /api/verify\nafter (+before) photo"]
     Health["GET /api/health"]
     QuotaCheck["Modal quota\nper-IP + global daily"]
   end
@@ -27,12 +28,15 @@ flowchart TB
   Lab --> Segment
   Lab --> Card
   Lab --> Safety
+  Lab --> Verify
   Lab --> Health
 
   Identify --> QuotaCheck
   Safety --> QuotaCheck
   Identify -->|"preferred"| Baseten
   Identify -.->|"fallback if BASETEN unset"| MetaAPI
+  Verify --> QuotaCheck
+  Verify -->|"preferred"| Baseten
   Segment --> MetaAPI
   Card --> MetaAPI
   Safety --> Modal
@@ -44,7 +48,8 @@ flowchart TB
 | Path | Status |
 |---|---|
 | identify · segment · card · safety · health | **Live** on https://seefix.vercel.app (measured Oct 31, 2026 PT) |
-| plan · verify · asr · recap · continuous camera · Neon/Blob | Planned — listed in README ASCII diagram, not claimed as shipped |
+| verify (after photo + optional before → Muse Spark Open, strict JSON) | **Live** (measured Nov 1, 2026 PT) |
+| plan · asr · recap · continuous camera / clip verify · Neon/Blob | Planned — listed in README ASCII diagram, not claimed as shipped |
 
 ## Failure contract
 

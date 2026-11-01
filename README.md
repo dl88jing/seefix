@@ -11,11 +11,12 @@ Hero demo: **replacing a worn toilet flapper**. Avery (first-time renter) has a 
 
 ## Demo video
 
-Narrated HyperFrames + Kokoro walkthrough of the live app (Muse Spark Open identify via Baseten, Glimmer safety gate, rate limits):
+Narrated HyperFrames + Kokoro walkthrough of the live app (Muse Spark Open identify via Baseten, SAM 3.1, Muse Image, Glimmer safety gate, rate limits):
 
-[![SeeFix demo](video/renders/seefix-demo-poster.png)](https://github.com/dl88jing/seefix/releases/latest/download/seefix-demo.mp4)
+[![SeeFix demo](video/renders/seefix-demo-poster.png)](https://youtu.be/HB-MryYy2qg)
 
-- **Video:** [seefix-demo.mp4](https://github.com/dl88jing/seefix/releases/latest/download/seefix-demo.mp4) (also in [`video/renders/seefix-demo.mp4`](video/renders/seefix-demo.mp4))
+- **YouTube:** https://youtu.be/HB-MryYy2qg (~76s)
+- **MP4:** [seefix-demo.mp4](https://github.com/dl88jing/seefix/releases/latest/download/seefix-demo.mp4) (also in [`video/renders/seefix-demo.mp4`](video/renders/seefix-demo.mp4))
 - **Poster:** [`video/renders/seefix-demo-poster.png`](video/renders/seefix-demo-poster.png)
 - **Live app:** https://seefix.vercel.app · **Lab:** https://seefix.vercel.app/lab
 
@@ -78,7 +79,17 @@ Models used: `meta-models/muse-spark-open-1026` (Muse Spark Open via Baseten), p
  Data: Neon Postgres (Drizzle) · Vercel Blob (clips, cards) · Upstash (rate limit) · /evals
 ```
 
-**Status:** `/api/identify`, `/api/segment`, `/api/card`, `/api/safety` and `/api/health` are live on Vercel and exercised from `/lab` (identify via Muse Spark Open / Baseten; safety via Glimmer on Modal with fail-closed rate limits). `/api/plan`, `/api/verify`, `/api/asr`, `/api/recap`, the continuous camera loop and the data layer are next.
+**Status (measured Sat Oct 31, 2026 ~10:30 PM PT against https://seefix.vercel.app):** `/api/identify`, `/api/segment`, `/api/card`, `/api/safety` and `/api/health` are live and called real models from `/lab` (no mocks). Identify uses Muse Spark Open on Baseten; SAM 3.1 + Muse Image hit the Meta Model API; safety uses Muse Glimmer on Modal (fail-closed rate limits). `/api/plan`, `/api/verify`, `/api/asr`, `/api/recap`, the continuous camera loop and the data layer are next.
+
+| Route | Measured | Notes |
+|---|---|---|
+| `GET /api/health` | HTTP 200 | All keys configured; `spark_provider: baseten` |
+| `POST /api/identify` | HTTP 200 · ~9.3 s | `provider: baseten`, model `meta-models/muse-spark-open-1026` |
+| `POST /api/segment` | HTTP 200 · ~1.9 s | Meta `sam-3.1` (empty `objects` on a plate-only photo is expected) |
+| `POST /api/card` | HTTP 200 · ~20 s | Meta `muse-image-1.0` edit |
+| `POST /api/safety` | HTTP 200 · ~182 s cold | Modal Glimmer; warm calls are much faster |
+
+**Honest fallbacks (never mocked):** missing env → HTTP 503 `not_configured` naming the var; Meta billing not active → HTTP 503 `meta_api_not_active` (Lab shows an amber banner); rate limit / unreachable quota on Vercel → 429 / 503 fail-closed.
 
 ### Routes
 
@@ -100,9 +111,11 @@ Images can be sent as `multipart/form-data` (field `image`) or JSON (`{"image": 
 
 ```bash
 git clone https://github.com/dl88jing/seefix && cd seefix
-npm install
+npm ci
 cp .env.example .env.local   # fill in values; .env.local is gitignored
+npm test                     # 19 unit tests, no API keys
 npm run dev                  # http://localhost:3000 and /lab
+./demo.sh                    # live health + tests; LIVE=1 to hit /api/identify
 ```
 
 ### Environment variables
@@ -145,7 +158,7 @@ Each Vercel instance also pre-checks the per-IP window in memory. Over the limit
 
 **Muse Spark Open via Baseten.** `/api/identify` prefers `BASETEN_API_KEY` and calls `meta-models/muse-spark-open-1026` on `https://inference.baseten.co/v1` (OpenAI-compatible). Spark Open is a reasoning model (`reasoning_content` plus final `content`); the route uses generous `max_tokens` and treats empty `content` as a 502 rather than inventing a result. If Baseten is unset, it falls back to the Meta Model API Spark id.
 
-**Meta API not yet active.** If the Meta account has no billing yet, Meta returns HTTP 402 `billing_error` / `billing_not_configured`. Meta-backed routes (and Spark when falling back to Meta) turn that into HTTP 503 `{"error":"meta_api_not_active"}` and `/lab` shows a "Meta API not yet active" notice instead of a raw error.
+**Meta billing fallback.** As of the Oct 31 PT probe, Meta-backed `/api/segment` and `/api/card` return real results. If Meta ever returns HTTP 402 `billing_error` / `billing_not_configured`, those routes (and Spark when falling back to Meta) map it to HTTP 503 `{"error":"meta_api_not_active"}` and `/lab` shows an amber "Meta API not yet active" banner — never a mocked mask or image.
 
 Status: the gate is deployed on Modal (H100, scale-to-zero, max one container) and answers `/v1/models` and chat requests; a cold start with cached weights takes about 2.5 minutes. The `vllm/vllm-openai:muse-glimmer` build does not enforce `response_format` JSON schemas for Glimmer, so `/api/safety` asks for the JSON shape in the prompt, extracts the object and validates it with zod (a missing `hazard` is derived from `severity` and reported in a `normalized` field).
 
@@ -162,6 +175,43 @@ vercel --prod
 ---
 
 
+
+## For judges (verifiable in under 2 minutes)
+
+**Track:** Indie Developer · **Theme:** Build for Your World · **Affiliation:** Green Robin Labs
+
+| What | Link |
+|---|---|
+| Live app | https://seefix.vercel.app |
+| Model lab | https://seefix.vercel.app/lab |
+| Demo video | https://youtu.be/HB-MryYy2qg |
+| Source | https://github.com/dl88jing/seefix |
+
+```bash
+# 1) Health — booleans only (never secrets)
+curl -sS https://seefix.vercel.app/api/health | python3 -m json.tool
+# Expect: ok true, spark_provider "baseten", BASETEN_API_KEY/META_API_KEY/GLIMMER_* true
+
+# 2) One-command demo (health + unit tests; no keys needed locally)
+git clone https://github.com/dl88jing/seefix && cd seefix && npm ci && ./demo.sh
+
+# 3) Optional live identify against the public deploy (counts toward rate limits)
+LIVE=1 ./demo.sh
+```
+
+In `/lab`, upload any fixture photo (or `video/assets/sample-plate.jpg`) and click **Identify**, **Segment**, **Card**, and **Safety**. Identify should show `provider: "baseten"`. If a Meta route is billing-blocked you will see a labeled 503 banner, not fake JSON.
+
+**Sponsor-stack honesty (what we actually call):**
+- Muse Spark Open (`meta-models/muse-spark-open-1026`) via **Baseten** — live identify
+- **SAM 3.1** + **Muse Image 1.0** via **Meta Model API** — live segment + card
+- **Muse Glimmer 30B** open weights on **Modal** (vLLM) — live safety gate
+- We do **not** claim Fireworks or Muse Wonder in the running paths
+
+**Bonus prizes we can honestly sit in:** Best Build on Open Weight Models (Spark Open + Glimmer); Best Creative Build (Muse Image cards). Agentic / viral / community-vote bonuses need the continuous verify loop or an X post — not claimed here.
+
+Architecture diagram: see ASCII above and [`docs/architecture.md`](docs/architecture.md).
+
+---
 ## Hackathon submission package
 
 Paste-ready Cerebral Valley field copy, cover, gallery, and pitch deck:
@@ -174,7 +224,7 @@ Paste-ready Cerebral Valley field copy, cover, gallery, and pitch deck:
 | Pitch deck (PDF) | [`submission/deck/seefix-pitch.pdf`](submission/deck/seefix-pitch.pdf) |
 | Demo video | [`video/renders/seefix-demo.mp4`](video/renders/seefix-demo.mp4) (~76s) |
 
-Submit at [Cerebral Valley](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/submit) before **Wed Nov 4, 2026 9:00 PM ET**. Affiliation: **Green Robin Labs**.
+Submit at [Cerebral Valley](https://cerebralvalley.ai/e/meta-ai-developer-hackathon/hackathon/submit) before **Wed Nov 4, 2026 9:00 PM ET** (= **6:00 PM PT** after DST ends Nov 1; PT is UTC-8). Affiliation: **Green Robin Labs**. Demo: https://youtu.be/HB-MryYy2qg
 
 ---
 

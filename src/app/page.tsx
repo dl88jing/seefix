@@ -58,16 +58,15 @@ export default function Home() {
         <a href="https://github.com/dl88jing/seefix" className="rounded-lg border border-zinc-700 px-5 py-3 hover:bg-zinc-900">
           Source on GitHub
         </a>
-        <a
-          href="https://github.com/dl88jing/seefix/releases/latest/download/seefix-demo.mp4"
-          className="rounded-lg border border-zinc-700 px-5 py-3 hover:bg-zinc-900"
-        >
+        <a href="https://youtu.be/HB-MryYy2qg" className="rounded-lg border border-zinc-700 px-5 py-3 hover:bg-zinc-900">
           Watch demo (~76s)
         </a>
       </div>
 
       <p className="mt-16 text-sm text-zinc-500">
-        Built by Green Robin Labs for the Meta Global AI Developer Hackathon (Indie · Oct 26–Nov 4, 2026). Live lab exercises identify, segment, card, and safety; camera verify loop next.
+        Built by Green Robin Labs for the Meta Global AI Developer Hackathon (Indie · Oct 26–Nov 4, 2026). Lab routes call real models
+        (Spark Open via Baseten, SAM 3.1 + Muse Image via Meta, Glimmer on Modal). Missing keys or inactive Meta billing return a labeled
+        503 — nothing is mocked. Continuous camera verify loop is next.
       </p>
     </main>
   );

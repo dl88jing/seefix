@@ -88,13 +88,14 @@ Lab / model bench: `https://seefix.vercel.app/lab`
 
 ### 8. Demo video URL
 ```
-<HUMAN: upload video/renders/seefix-demo.mp4 to YouTube as Unlisted, then paste URL here>
+https://youtu.be/HB-MryYy2qg
 ```
 Local / release backup (works for judges who accept direct MP4):
 ```
 https://github.com/dl88jing/seefix/releases/latest/download/seefix-demo.mp4
 ```
 - Duration: ~76 seconds (under 3-minute cap)
+- YouTube title: "SeeFix — snap a photo, get a verified repair plan (Meta Muse Spark demo)"
 - Path: `video/renders/seefix-demo.mp4`
 - Poster: `video/renders/seefix-demo-poster.png`
 - Stack: HyperFrames + Kokoro TTS (`af_heart`)
@@ -153,6 +154,22 @@ Spark Open via Baseten with strict JSON schema was reliable once max_tokens acco
 
 ---
 
+
+## Live health (measured Sat Oct 31, 2026 ~10:30 PM PT)
+
+Against https://seefix.vercel.app (no mocks):
+
+| Route | Result |
+|---|---|
+| `/api/health` | 200; `spark_provider: baseten`; BASETEN + META + GLIMMER_* configured |
+| `/api/identify` | 200 · ~9.3 s · Baseten Muse Spark Open |
+| `/api/segment` | 200 · ~1.9 s · Meta SAM 3.1 |
+| `/api/card` | 200 · ~20 s · Meta Muse Image |
+| `/api/safety` | 200 · ~182 s cold · Modal Muse Glimmer |
+
+Update description / Meta-products fields if the form still shows older "Meta API not yet active" wording.
+
+---
 ## Assets checklist
 
 | Asset | Path | Ready |
@@ -162,7 +179,7 @@ Spark Open via Baseten with strict JSON schema was reliable once max_tokens acco
 | Pitch PDF | `submission/deck/seefix-pitch.pdf` | yes |
 | Demo MP4 | `video/renders/seefix-demo.mp4` (~76s) | yes |
 | Field copy | this file | yes |
-| YouTube URL | — | **needs human** |
+| YouTube URL | https://youtu.be/HB-MryYy2qg | yes |
 | CV login + paste | portal | **needs human** |
 | Official Rules accept | CV details (login) | **needs human if not done** |
 | Meta credits claim | Google Form from Oct 26 blast | claim individually by Nov 4 9 PM ET |
@@ -172,8 +189,9 @@ Spark Open via Baseten with strict JSON schema was reliable once max_tokens acco
 ## Human blockers (cannot automate)
 
 1. **Sign in to Cerebral Valley** and open the submit form; confirm exact field labels / uploads; paste copy from this file.
-2. **Upload demo to YouTube (Unlisted)** from `video/renders/seefix-demo.mp4`, paste URL into the video field (and into §8 above).
-3. **Meta / CV login** for Official Rules acceptance, Discord, and any credit forms still unpaid.
+2. **Confirm YouTube URL** https://youtu.be/HB-MryYy2qg is in the video field (already public).
+3. **Meta / CV login** for Official Rules acceptance, Discord, and any credit forms still unpaid (credits claim deadline = submission deadline).
 4. Optional: X post for viral bonus; attach cover/gallery/deck if the form offers uploads.
+5. **Re-save form after README/demo polish** if the portal still allows edits before Wed Nov 4, 2026 9:00 PM ET.
 
 Do **not** commit secrets (`.env.local`, API keys). Run gitleaks before push.

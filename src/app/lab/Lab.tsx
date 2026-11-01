@@ -93,6 +93,8 @@ export default function Lab() {
   const [phrase, setPhrase] = useState("toilet flapper");
   const [instruction, setInstruction] = useState("Label the flapper and the chain. Show the chain clipped with about 1/2 inch of slack.");
   const [step, setStep] = useState("Turn off the water supply valve and flush to drain the tank before removing the flapper.");
+  const [expected, setExpected] = useState("Flapper chain clipped with about 1/2 inch of slack; flapper sits flat on the drain seat.");
+  const [before, setBefore] = useState<{ dataUrl: string; w: number; h: number } | null>(null);
   const [results, setResults] = useState<Record<string, Result>>({});
   const [busy, setBusy] = useState<Record<string, boolean>>({});
   const [health, setHealth] = useState<Record<string, boolean | string | null> | null>(null);
@@ -259,6 +261,34 @@ export default function Lab() {
             <img src={cardImage} alt="Edited instruction card" className="mt-3 w-full rounded-lg" />
           )}
           <JsonPane title="response" result={results.card ?? null} busy={!!busy.card} />
+        </section>
+
+        <section className="rounded-xl border border-zinc-800 p-5 lg:col-span-2">
+          <h2 className="font-medium">Verify the fix · Muse Spark Open (Baseten)</h2>
+          <p className="text-sm text-zinc-400">
+            Uses the photo above as the <em>after</em> photo. Optionally add a <em>before</em> photo. Returns
+            done / not_done / unclear with visible evidence and one next action. Shares the identify rate limit.
+          </p>
+          <label className="mt-3 block text-xs text-zinc-500">Expected result</label>
+          <input value={expected} onChange={(e) => setExpected(e.target.value)} className="mt-1 w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm" placeholder="what the finished step should look like" />
+          <label className="mt-3 block text-xs text-zinc-500">Before photo (optional)</label>
+          <input
+            type="file"
+            accept="image/*"
+            className="mt-1 block text-sm file:mr-3 file:rounded-md file:border-0 file:bg-zinc-800 file:px-3 file:py-2 file:text-zinc-100"
+            onChange={async (e) => {
+              const f = e.target.files?.[0];
+              setBefore(f ? await prepareImage(f) : null);
+            }}
+          />
+          <button
+            disabled={!img || busy.verify || !expected.trim()}
+            onClick={() => run("verify", "/api/verify", before ? { step: expected, before: before.dataUrl } : { step: expected })}
+            className="mt-3 rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-zinc-950 disabled:opacity-40"
+          >
+            POST /api/verify
+          </button>
+          <JsonPane title="response" result={results.verify ?? null} busy={!!busy.verify} />
         </section>
       </div>
     </main>

@@ -46,3 +46,28 @@ export const SafetyJsonSchema = {
   },
   required: ["hazard", "severity", "reason"],
 } as const;
+
+/** /api/verify: did the user's after-photo show the step done? */
+export const VerifyVerdict = z.object({
+  verdict: z.enum(["done", "not_done", "unclear"]),
+  confidence: z.number().min(0).max(1),
+  evidence: z.string(),
+  next_action: z.string(),
+});
+export type VerifyVerdict = z.infer<typeof VerifyVerdict>;
+
+export const VerifyJsonSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    verdict: {
+      type: "string",
+      enum: ["done", "not_done", "unclear"],
+      description: "done only if the photo clearly shows the expected result; unclear if the part is not visible or the photo is ambiguous.",
+    },
+    confidence: { type: "number", description: "0..1 confidence in the verdict." },
+    evidence: { type: "string", description: "What in the photo supports the verdict (one or two sentences)." },
+    next_action: { type: "string", description: "One concrete next step for the user (retake photo, adjust part, or done)." },
+  },
+  required: ["verdict", "confidence", "evidence", "next_action"],
+} as const;

@@ -15,6 +15,18 @@ export type ParsedInput = {
 
 export class InputError extends Error {}
 
+/** Validate a base64 image data URL (same rules as the main "image" field). */
+export function parseImageDataUrl(value: unknown, field = "image"): { dataUrl: string; mime: string; bytes: number } {
+  if (typeof value !== "string") throw new InputError(`JSON field "${field}" (data URL) is required`);
+  const m = /^data:(image\/[a-z+.-]+);base64,([A-Za-z0-9+/=]+)$/i.exec(value);
+  if (!m) throw new InputError(`"${field}" must be a base64 data URL`);
+  const mime = m[1].toLowerCase();
+  if (!ALLOWED.has(mime)) throw new InputError(`unsupported image type ${mime}`);
+  const bytes = Math.floor((m[2].length * 3) / 4);
+  if (bytes > MAX_BYTES) throw new InputError(`${field} too large (${bytes} bytes, max ${MAX_BYTES})`);
+  return { dataUrl: value, mime, bytes };
+}
+
 export async function readImageInput(req: Request): Promise<ParsedInput> {
   const ct = req.headers.get("content-type") || "";
   if (ct.includes("multipart/form-data")) {
@@ -32,15 +44,10 @@ export async function readImageInput(req: Request): Promise<ParsedInput> {
   if (ct.includes("application/json")) {
     const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
     if (!body || typeof body.image !== "string") throw new InputError('JSON field "image" (data URL) is required');
-    const m = /^data:(image\/[a-z+.-]+);base64,([A-Za-z0-9+/=]+)$/i.exec(body.image);
-    if (!m) throw new InputError('"image" must be a base64 data URL');
-    const mime = m[1].toLowerCase();
-    if (!ALLOWED.has(mime)) throw new InputError(`unsupported image type ${mime}`);
-    const bytes = Math.floor((m[2].length * 3) / 4);
-    if (bytes > MAX_BYTES) throw new InputError(`image too large (${bytes} bytes, max ${MAX_BYTES})`);
+    const { mime, bytes } = parseImageDataUrl(body.image);
     const fields: Record<string, string> = {};
     for (const [k, v] of Object.entries(body)) if (k !== "image" && typeof v === "string") fields[k] = v;
-    return { dataUrl: body.image, mime, bytes, fields };
+    return { dataUrl: body.image as string, mime, bytes, fields };
   }
   throw new InputError("send multipart/form-data or application/json");
 }

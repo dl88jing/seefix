@@ -32,7 +32,7 @@ Built by **Green Robin Labs** for the Meta Global AI Developer Hackathon (Indie 
 Original work by Green Robin Labs (everything under `src/` and `modal/`):
 
 - The inference integration layer (`src/lib/*`): Muse Spark Open via Baseten (preferred) with Meta Model API fallback for Spark structured output, SAM 3.1 streaming segmentation, Muse Image edits, input validation and the "no mock data" 503 contract.
-- API routes `/api/identify`, `/api/segment`, `/api/card`, `/api/safety`, `/api/health`.
+- API routes `/api/identify`, `/api/verify`, `/api/segment`, `/api/card`, `/api/safety`, `/api/health`.
 - The `/lab` test bench (client-side SAM mask rendering on canvas) and the landing page.
 - The Modal deployment of Muse Glimmer as a self-hosted safety gate (`modal/glimmer_gate.py`).
 
@@ -130,7 +130,7 @@ npm run dev                  # http://localhost:3000 and /lab
 | `META_API_KEY` | `/api/segment`, `/api/card`; Spark fallback | Meta Model API key from dev.meta.ai. `MODEL_API_KEY` is accepted as a fallback. Used for Spark only when `BASETEN_API_KEY` is unset. |
 | `GLIMMER_URL` | `/api/safety` | Base URL of the Modal web endpoint (no trailing `/v1`). |
 | `GLIMMER_API_KEY` | `/api/safety` (when the gate is locked); shared quota auth | Must match `GLIMMER_API_KEY` in the Modal secret `seefix-glimmer`. |
-| `GLIMMER_QUOTA_URL` | `/api/safety`, `/api/identify` (on Vercel) | Web URL of the `quota` function (rate limiter) in the same Modal app. Without it those routes stay closed in production. |
+| `GLIMMER_QUOTA_URL` | `/api/safety`, `/api/identify`, `/api/verify` (on Vercel) | Web URL of the `quota` function (rate limiter) in the same Modal app. Without it those routes stay closed in production. |
 | `META_BASE_URL` | optional | Defaults to `https://api.meta.ai/v1`. |
 | `META_SPARK_MODEL`, `META_SAM_MODEL`, `META_IMAGE_MODEL`, `GLIMMER_MODEL` | optional | Override model ids when not on Baseten (defaults: `muse-spark-1.3`, `sam-3.1`, `muse-image-1.0`, `muse-glimmer`). |
 | `SPARK_PER_IP_PER_HOUR`, `SPARK_GLOBAL_PER_DAY` | optional | Identify rate limits (defaults: 20 / hour / IP, 200 / UTC day). |
@@ -149,11 +149,11 @@ modal deploy modal/glimmer_gate.py                  # prints the web endpoint UR
 
 Then set `GLIMMER_URL` (the printed `serve` URL), `GLIMMER_QUOTA_URL` (the printed `quota` URL) and `GLIMMER_API_KEY` on Vercel.
 
-**Rate limits (before any paid call).** `/api/safety` and `/api/identify` are metered before Baseten, Meta, or the Glimmer GPU is touched. The `quota` Modal function (one CPU container, scale-to-zero, counters in the Modal Dict `seefix-glimmer-quota`, IPs HMAC-hashed) enforces separate buckets:
+**Rate limits (before any paid call).** `/api/safety`, `/api/identify` and `/api/verify` are metered before Baseten, Meta, or the Glimmer GPU is touched. The `quota` Modal function (one CPU container, scale-to-zero, counters in the Modal Dict `seefix-glimmer-quota`, IPs HMAC-hashed) enforces separate buckets:
 
 | Bucket | Route | Per IP / hour | Global / UTC day |
 |---|---|---|---|
-| `spark` | `/api/identify` | 20 | 200 |
+| `spark` | `/api/identify` + `/api/verify` (shared) | 20 | 200 |
 | `safety` | `/api/safety` | 10 | 100 |
 
 Each Vercel instance also pre-checks the per-IP window in memory. Over the limit returns HTTP 429 with `Retry-After`; on Vercel, if the limiter is unreachable the route fails closed (503). Override with `SPARK_*` / `SAFETY_*` at `modal deploy` time (and matching Vercel env if you mirror them).
